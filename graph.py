@@ -78,6 +78,21 @@ class Mul(Neuron):
         self.value = reduce(operator.mul, [neuron.value for neuron in self.inbound_neurons])
 
 
+class Linear(Neuron):
+    def __init__(self, inputs, weights, bias):
+        Neuron.__init__(self, inputs)
+        self.weights = weights
+        self.bias = bias
+
+    def forward(self):
+        """
+        Set self.value to the value of the linear function output.
+
+        """
+        self.value = sum([x.value * w.value for x, w in zip(self.inbound_neurons, self.weights)])
+        self.value += self.bias.value
+
+
 def topological_sort(feed_dict):
     """
     Sort generic nodes in topological order using Kahn's Algorithm.
