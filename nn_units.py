@@ -3,7 +3,7 @@ This script builds and runs a graph.
 
 """
 
-from graph import *
+from graph.units import *
 
 
 def test_base_classes():
