@@ -1,11 +1,14 @@
 import numpy as np
 
-
 class Layer:
     def __init__(self, inbound_layers=[]):
         self.inbound_layers = inbound_layers
         self.value = None
         self.outbound_layers = []
+        # New property! Keys are the inputs to this layer and
+        # their values are the partials of this layer with
+        # respect to that input.
+        self.gradients = {}
         for layer in inbound_layers:
             layer.outbound_layers.append(self)
 
@@ -15,8 +18,6 @@ class Layer:
 
 class Input(Layer):
     def __init__(self):
-        # An Input layer has no inbound layers,
-        # so no need to pass anything to the Layer instantiator
         Layer.__init__(self)
 
     def forward(self):
@@ -26,13 +27,31 @@ class Input(Layer):
 
 class Linear(Layer):
     def __init__(self, inbound_layer, weights, bias):
-        # Notice the ordering of the input layers passed to the
-        # Layer constructor.
         Layer.__init__(self, [inbound_layer, weights, bias])
 
     def forward(self):
-        self.value = np.dot(self.inbound_layers[0].value, self.inbound_layers[1].value)
-        self.value += self.inbound_layers[2].value
+        inputs = self.inbound_layers[0].value
+        weights = self.inbound_layers[1].value
+        bias = self.inbound_layers[2].value
+        self.value = np.dot(inputs, weights) + bias
+
+
+class Sigmoid(Layer):
+    def __init__(self, layer):
+        Layer.__init__(self, [layer])
+
+    def _sigmoid(self, x):
+        """
+        This method is separate from `forward` because it
+        will be used with `backward` as well.
+
+        `x`: A numpy array-like object.
+        """
+        return 1. / (1. + np.exp(-x))
+
+    def forward(self):
+        input_value = self.inbound_layers[0].value
+        self.value = self._sigmoid(input_value)
 
 
 def topological_sort(feed_dict):
@@ -93,3 +112,21 @@ def forward_pass(output_layer, sorted_layers):
         n.forward()
 
     return output_layer.value
+
+
+def MSE(computed_output, ideal_output, n_inputs):
+    """
+    Calculates the mean squared error.
+    
+    `computed_output`: a numpy array
+    `ideal_output`: a numpy array
+    `n_inputs`: the number of training inputs (not including weights
+                or biases) to the network
+    
+    Return the mean squared error of output layer.
+    
+    You will want to use np.linalg.norm to make your calculation easier.
+    
+    Your code here!
+    """
+    pass

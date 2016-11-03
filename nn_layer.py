@@ -27,11 +27,11 @@ def test_layer():
     [[-9., 4.],
     [-9., 4.]]
     """
-    print("Output should be:", np.array([[-9., 4.], [-9., 4.]]))
+    print("Output should be:\n", np.array([[-9., 4.], [-9., 4.]]))
     print(output)
 
 
-def test_activation():
+def test_sigmoid():
     inputs, weights, bias = Input(), Input(), Input()
 
     f = Linear(inputs, weights, bias)
@@ -51,12 +51,16 @@ def test_activation():
     [[  1.23394576e-04   9.82013790e-01]
     [  1.23394576e-04   9.82013790e-01]]
     """
+    print("Output should be:\n", np.array([[1.23394576e-04, 9.82013790e-01],
+                                        [ 1.23394576e-04, 9.82013790e-01]]))
     print(output)
+
+
+
 
 if __name__ == "__main__":
     # simple layer
     test_layer()
 
     # activation
-
-
+    test_sigmoid()
