@@ -5,9 +5,6 @@ class Layer:
         self.inbound_layers = inbound_layers
         self.value = None
         self.outbound_layers = []
-        # New property! Keys are the inputs to this layer and
-        # their values are the partials of this layer with
-        # respect to that input.
         self.gradients = {}
         for layer in inbound_layers:
             layer.outbound_layers.append(self)
@@ -41,12 +38,6 @@ class Sigmoid(Layer):
         Layer.__init__(self, [layer])
 
     def _sigmoid(self, x):
-        """
-        This method is separate from `forward` because it
-        will be used with `backward` as well.
-
-        `x`: A numpy array-like object.
-        """
         return 1. / (1. + np.exp(-x))
 
     def forward(self):
@@ -115,18 +106,4 @@ def forward_pass(output_layer, sorted_layers):
 
 
 def MSE(computed_output, ideal_output, n_inputs):
-    """
-    Calculates the mean squared error.
-    
-    `computed_output`: a numpy array
-    `ideal_output`: a numpy array
-    `n_inputs`: the number of training inputs (not including weights
-                or biases) to the network
-    
-    Return the mean squared error of output layer.
-    
-    You will want to use np.linalg.norm to make your calculation easier.
-    
-    Your code here!
-    """
-    pass
+    return ((ideal_output - computed_output)**2).sum() / 2*n_inputs
