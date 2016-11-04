@@ -1,4 +1,5 @@
 import numpy as np
+import random
 
 class Layer:
     """
@@ -139,12 +140,11 @@ class Sigmoid(Layer):
         """
         # Initialize the gradients to 0.
         self.gradients = {n: np.zeros_like(n.value) for n in self.inbound_layers}
-        # Sum the derivative with respect to the input over all the outputs.
+        # Sum the partial with respect to the input over all the outputs.
         for n in self.outbound_layers:
             grad_cost = n.gradients[self]
             sigmoid = self.value
             self.gradients[self.inbound_layers[0]] += sigmoid * (1 - sigmoid) * grad_cost
-
 
 
 class MSE(Layer):
@@ -181,7 +181,7 @@ class MSE(Layer):
         Calculates the gradient of the cost.
         """
         self.gradients[self.inbound_layers[0]] = -2 * (self.ideal_output - self.computed_output)
-        
+
 
 def topological_sort(feed_dict, ideal_output):
     """
@@ -230,30 +230,44 @@ def topological_sort(feed_dict, ideal_output):
     return L
 
 
-def forward_and_backward(feed_dict, ideal_output, trainables=[]):
+def train_SGD(feed_dict, ideal_output, trainables=[], epochs=1, learning_rate=1e-2):
     """
-    Performs a forward pass and a backward pass through a list of sorted Layers.
-
-    Returns a list of the gradients on the trainables.
+    Performs many forward passes and a backward passes through
+    a list of sorted Layers while performing stochastic gradient
+    descent.
 
     Arguments:
 
         `feed_dict`: A dictionary where the key is a `Input` Layer and the value is the respective value feed to that Layer.
         `ideal_output`: The correct output value for the last activation layer.
-        `trainables`: Inputs that need to be modified by gradient descent.
+        `trainables`: Inputs that need to be modified by SGD.
+        `epochs`: The number of times to train against all training inputs.
+        `learning_rate`: The step size for changes by each gradient.
     """
 
     sorted_layers = topological_sort(feed_dict, ideal_output)
 
-    # Forward pass
-    for n in sorted_layers:
-        n.forward()
+    for i in range(epochs):
+        # Forward pass
+        for n in sorted_layers:
+            n.forward()
 
-    # Backward pass
-    reversed_layers = sorted_layers[::-1] # see: https://docs.python.org/2.3/whatsnew/section-slices.html
+        # Backward pass
+        reversed_layers = sorted_layers[::-1] 
 
-    for n in reversed_layers:
-        n.backward()
+        for n in reversed_layers:
+            n.backward()
 
-    # Returns a list of the gradients on the weights and bias (the trainables).
-    return [n.gradients[n] for n in trainables]
+        # Performs SGD
+        # Get a list of the partials with respect to each trainable input.
+        partials = [n.gradients[n] for n in trainables]
+        # Loop over the trainables
+        for n in range(len(trainables)):
+            # Change the trainable's value by subtracting the learning rate
+            # multiplied by the partial of the cost with respect to this
+            # trainable.
+            trainables[n].value -= learning_rate * partials[n]
+
+        print('Epoch: ' + str(i) + ', Loss: ' + str(sorted_layers[-1].value))
+
+    return sorted_layers[-1].value
