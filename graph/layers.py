@@ -29,6 +29,8 @@ class Layer:
         # this layer's inputs.
         for layer in inbound_layers:
             layer.outbound_layers.append(self)
+        # Most of the layers are not trainable, e.g. activations, inputs, and costs
+        self.trainable = False
 
     def forward():
         """
@@ -49,13 +51,14 @@ class Input(Layer):
     """
     A generic input into the network.
     """
-    def __init__(self):
+    def __init__(self, trainable=False):
         # The base class constructor has to run to set all
         # the properties here.
         #
         # The most important property on an Input is value.
         # self.value is set during `topological_sort` later.
         Layer.__init__(self)
+        self.trainable = trainable
 
     def forward(self):
         # Do nothing because nothing is calculated.
@@ -230,7 +233,7 @@ def topological_sort(feed_dict, ideal_output):
     return L
 
 
-def train_SGD(feed_dict, ideal_output, trainables=[], epochs=1, learning_rate=1e-2):
+def train_SGD(feed_dict, ideal_output, epochs=1, learning_rate=1e-2):
     """
     Performs many forward passes and a backward passes through
     a list of sorted Layers while performing stochastic gradient
@@ -259,14 +262,9 @@ def train_SGD(feed_dict, ideal_output, trainables=[], epochs=1, learning_rate=1e
             n.backward()
 
         # Performs SGD
-        # Get a list of the partials with respect to each trainable input.
-        partials = [n.gradients[n] for n in trainables]
-        # Loop over the trainables
-        for n in range(len(trainables)):
-            # Change the trainable's value by subtracting the learning rate
-            # multiplied by the partial of the cost with respect to this
-            # trainable.
-            trainables[n].value -= learning_rate * partials[n]
+        for n in sorted_layers:
+            if n.trainable:
+                n.value -= learning_rate * n.gradients[n]
 
         print('Epoch: ' + str(i) + ', Loss: ' + str(sorted_layers[-1].value))
 

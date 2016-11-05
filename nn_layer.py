@@ -7,7 +7,8 @@ import numpy as np
 from graph.layers import *
 
 def test_sgd():
-    inputs, weights, bias = Input(), Input(), Input()
+    inputs, weights, bias = Input(), Input(trainable=True), Input(trainable=True)
+    random.seed(1)
 
     x = np.array([[-1., -2.], [-1, -2]])
     w = np.array([[random.random(), random.random()], [random.random(), random.random()]])
@@ -19,7 +20,7 @@ def test_sgd():
     f = Linear(inputs, weights, bias)
     g = Sigmoid(f)
 
-    weights2, bias2 = Input(), Input()
+    weights2, bias2 = Input(True), Input(True)
     w2 = np.array([[random.random(), random.random()], [random.random(), random.random()]])
     b2 = np.array([random.random(), random.random()])
 
@@ -28,7 +29,7 @@ def test_sgd():
 
     feed_dict = {inputs: x, weights: w, bias: b, weights2: w2, bias2: b2}
 
-    train_SGD(feed_dict, ideal_output, [weights, bias, weights2, bias2], 20, learning_rate=0.1)
+    train_SGD(feed_dict, ideal_output, 20, learning_rate=0.1)
 
 if __name__ == "__main__":
     test_sgd()
