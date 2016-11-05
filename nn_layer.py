@@ -18,11 +18,26 @@ def test_sgd():
 
     f = Linear(inputs, weights, bias)
     g = Sigmoid(f)
-    cost = MSE(g)
 
-    feed_dict = {inputs: x, weights: w, bias: b}
+    weights2, bias2 = Input(), Input()
+    w2 = np.array([[random.random(), random.random()], [random.random(), random.random()]])
+    b2 = np.array([random.random(), random.random()])
 
-    train_SGD(feed_dict, ideal_output, [weights, bias], 20, learning_rate=1)
+    f2 = Linear(g, weights2, bias2)
+    cost = MSE(f2)
+
+    feed_dict = {inputs: x, weights: w, bias: b, weights2: w2, bias2: b2}
+
+    train_SGD(feed_dict, ideal_output, [weights, bias, weights2, bias2], 20, learning_rate=0.1)
 
 if __name__ == "__main__":
     test_sgd()
+
+
+
+
+# Congratulations on making it to the end of this lab! Building a neural network from scratch is no small task. You should be proud!
+# MiniFlow has the makings of becoming a powerful deep learning tool. It is entirely possible to classify something like the MNIST database with MiniFlow. MiniFlow only uses one training input at the moment and the biggest step remaining is iterating over many training inputs.
+# I'll leave it as an exercise for you to finish MiniFlow from here.
+# In the next lessons, you'll work with TensorFlow and then Keras, a high level framework on top of TensorFlow. Now that you've built a neural network from scratch, you should be in great shape!
+
