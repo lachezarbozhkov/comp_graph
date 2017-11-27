@@ -9,27 +9,35 @@ from graph.layers import *
 def test_sgd():
     inputs, weights, bias = Input(), Input(trainable=True), Input(trainable=True)
     random.seed(1)
+    np.random.seed(1)
 
-    x = np.array([[-1., -2.], [-1, -2]])
-    w = np.array([[random.random(), random.random()], [random.random(), random.random()]])
-    b = np.array([random.random(), random.random()])
+    x = np.array([[-1., -2.], [-1, -2],  [-1, -2]])
+    x = np.array([[-1., -2., 2], [-1, -2, 2],  [-1, -2, 2]])
+
+    w = np.random.rand(3,2)
+    b = np.random.rand(2)
+
     ideal_output = np.array(
-        [[1.23394576e-04, 9.82013790e-01],
-        [1.23394576e-04, 9.82013790e-01]])
+        [[0, 1],
+        [0, 1],
+        [0, 1]])
 
     f = Linear(inputs, weights, bias)
     g = Sigmoid(f)
 
     weights2, bias2 = Input(True), Input(True)
-    w2 = np.array([[random.random(), random.random()], [random.random(), random.random()]])
-    b2 = np.array([random.random(), random.random()])
+    w2 = np.random.rand(2,2)
+    b2 = np.random.rand(2)
 
     f2 = Linear(g, weights2, bias2)
-    cost = MSE(f2)
+    g2 = Sigmoid(f2)
+    cost = MSE(g2)
 
     feed_dict = {inputs: x, weights: w, bias: b, weights2: w2, bias2: b2}
 
-    train_SGD(feed_dict, ideal_output, 20, learning_rate=0.1)
+    train_SGD(feed_dict, ideal_output, 10, learning_rate=0.1)
+    print(x.shape)
+    print(ideal_output.shape)
 
 if __name__ == "__main__":
     test_sgd()

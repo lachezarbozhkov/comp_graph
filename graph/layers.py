@@ -9,11 +9,12 @@ class Layer:
 
         `inbound_layers`: A list of layers with edges into this layer.
     """
-    def __init__(self, inbound_layers=[]):
+    def __init__(self, inbound_layers=[], name=""):
         """
         Layer's constructor (runs when the object is instantiated). Sets
         properties that all layers need.
         """
+        self.name = name
         # A list of layers with edges into this layer.
         self.inbound_layers = inbound_layers
         # The eventual value of this layer. Set by running
@@ -51,13 +52,13 @@ class Input(Layer):
     """
     A generic input into the network.
     """
-    def __init__(self, trainable=False):
+    def __init__(self, trainable=False, name="Input"):
         # The base class constructor has to run to set all
         # the properties here.
         #
         # The most important property on an Input is value.
         # self.value is set during `topological_sort` later.
-        Layer.__init__(self)
+        Layer.__init__(self, name=name)
         self.trainable = trainable
 
     def forward(self):
@@ -79,10 +80,10 @@ class Linear(Layer):
     """
     Represents a layer that performs a linear transform.
     """
-    def __init__(self, inbound_layer, weights, bias):
+    def __init__(self, inbound_layer, weights, bias, name="Linear"):
         # The base class (Layer) constructor. Weights and bias
         # are treated like inbound layers.
-        Layer.__init__(self, [inbound_layer, weights, bias])
+        Layer.__init__(self, [inbound_layer, weights, bias], name)
 
     def forward(self):
         """
@@ -116,9 +117,9 @@ class Sigmoid(Layer):
     """
     Represents a layer that performs the sigmoid activation function.
     """
-    def __init__(self, layer):
+    def __init__(self, layer, name="Sigmoid"):
         # The base class constructor.
-        Layer.__init__(self, [layer])
+        Layer.__init__(self, [layer], name=name)
 
     def _sigmoid(self, x):
         """
@@ -221,7 +222,7 @@ def topological_sort(feed_dict, ideal_output):
         if isinstance(n, MSE):
             n.ideal_output = ideal_output
             # there is only 1 input in this example
-            n.n_inputs = 1
+            n.n_inputs = ideal_output.shape[0]
 
         L.append(n)
         for m in n.outbound_layers:
